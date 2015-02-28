@@ -72,34 +72,28 @@ extension List {
         return self
     }
     
-    func _repeat(state: List<T>) -> List<T> {
-        if let v = state.car {
-            return lazyCons(v) { self._repeat(state.cdr) }
-        }
+    func _repeat(origin: List<T>) -> List<T> {
         if let v = self.car {
-            return self._repeat(self)
+            return lazyCons(v) { self.cdr._repeat(origin) }
         }
-        return .Nil
+        return origin._repeat(origin)
     }
     var repeat: List<T> {
         return self._repeat(self)
     }
-    func _repeat(n: Int, _ state: List<T>) -> List<T> {
+    func _repeat(n: Int, _ origin: List<T>) -> List<T> {
         if n <= 0 {
             return .Nil
         }
-        if let v = state.car {
-            return lazyCons(v) { self._repeat(n, state.cdr) }
-        }
         if let v = self.car {
-            return self._repeat(n - 1, self)
+            return lazyCons(v) { self.cdr._repeat(n, origin) }
         }
-        return .Nil
+        return origin._repeat(n - 1, origin)
     }
     func repeat(n: Int) -> List<T> {
         return self._repeat(n, self)
     }
-    
+
     func map<U>(f: T -> U) -> List<U> {
         if let car = self.car {
             return lazyCons(f(car)) { self.cdr.map(f) }
@@ -125,6 +119,13 @@ extension List {
     }
 }
 
+func +<T>(a: List<T>, b: List<T>) -> List<T> {
+    if let v = a.car {
+        return lazyCons(v) { a.cdr + b }
+    }
+    return b
+}
+
 func infinity<T>(v: T, f: T -> T) -> List<T> {
     return lazyCons(v) { infinity(f(v), f) }
 }
@@ -140,6 +141,16 @@ println("-- odd number --")
 
 let odd = infinity(1){ $0 + 2 }
 for n in odd.take(15) {
+    println(n)
+}
+
+println("-- repeat --")
+for n in infinity(0, { $0 + 1 }).take(3).repeat(4) {
+    println(n)
+}
+
+println("-- combine --")
+for n in (infinity(0){ $0 + 1 }.take(3) + infinity(3){ $0 - 1 }.take(3)).repeat.take(20) {
     println(n)
 }
 
