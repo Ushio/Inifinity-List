@@ -7,6 +7,15 @@ enum List<T> {
     case Nil
 }
 
+
+func cons<T>(value: T, list: List<T>) -> List<T> {
+    return List.Cons(value, { list })
+}
+
+func lazyCons<T>(value: T, f: () -> List<T>) -> List<T> {
+    return List.Cons(value, f)
+}
+
 extension List {
     var car: T? {
         switch self {
@@ -24,13 +33,6 @@ extension List {
             return .Nil
         }
     }
-}
-
-func cons<T>(value: T, list: List<T>) -> List<T> {
-    return List.Cons(value, { list })
-}
-func lazyCons<T>(value: T, f: () -> List<T>) -> List<T> {
-    return List.Cons(value, f)
 }
 
 extension List : SequenceType {
@@ -115,6 +117,12 @@ extension List {
         }
         return .Nil
     }
+    func reduce<R>(var initial: R, combine: (R, T) -> R) -> R {
+        for value in self {
+            initial = combine(initial, value)
+        }
+        return initial
+    }
 }
 
 func infinity<T>(v: T, f: T -> T) -> List<T> {
@@ -127,6 +135,14 @@ let natural = infinity(1){ $0 + 1 }
 for n in natural.take(15) {
     println(n)
 }
+
+println("-- odd number --")
+
+let odd = infinity(1){ $0 + 2 }
+for n in odd.take(15) {
+    println(n)
+}
+
 
 println("-- fibonacci number --")
 func fibonacci(a: Int64, b: Int64) -> List<Int64> {
@@ -147,12 +163,11 @@ func xorshift(var x: UInt32, var y: UInt32, var z: UInt32, var w: UInt32) -> Lis
     return lazyCons(w) { xorshift(x, y, z, w) }
 }
 
-for n in xorshift(2490342, 5346, 34, 24).take(5) {
+for n in xorshift(24903412, 53346, 34, 24).take(30).map({$0 % 10}) {
     println(n)
 }
 
 println("-- map --")
-
 for n in natural.take(10).map({ $0 * $0 }) {
     println(n)
 }
@@ -161,3 +176,27 @@ println("-- filter --")
 for n in natural.take(10).filter({ $0 % 2 == 0 }) {
     println(n)
 }
+
+println("-- reduce --")
+println(natural.take(10).reduce(0, combine: { $0 + $1 }))
+
+println("-- newton sqrt --")
+func newton_sqrt(x: Double, a: Double) -> List<Double> {
+    let f = { x in (x + a / x) * 0.5 }
+    return lazyCons(x) { newton_sqrt(f(x), a) }
+}
+
+for n in newton_sqrt(2.0, 2.0).take(6) {
+    println(n)
+}
+
+println("-- Napier's constant --")
+func napiers_constant(n: Double) -> List<Double> {
+    let f = { t in pow(1.0 + t, 1.0 / t) }
+    return lazyCons(f(n)) { napiers_constant(n * 0.5) }
+}
+
+for n in napiers_constant(1.0).take(50) {
+    println(n)
+}
+
