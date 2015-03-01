@@ -125,6 +125,12 @@ func +<T>(a: List<T>, b: List<T>) -> List<T> {
     }
     return b
 }
+func zip<T, U>(a: List<T>, b: List<U>) -> List<(T, U)> {
+    if let va = a.car, vb = b.car {
+        return lazyCons((va, vb)) { zip(a.cdr, b.cdr) }
+    }
+    return .Nil
+}
 
 func infinity<T>(v: T, f: T -> T) -> List<T> {
     return lazyCons(v) { infinity(f(v), f) }
@@ -154,6 +160,11 @@ for n in (infinity(0){ $0 + 1 }.take(3) + infinity(3){ $0 - 1 }.take(3)).repeat.
     println(n)
 }
 
+println("-- zip --")
+let index = infinity(0){ $0 + 1 }
+for (i, n) in zip(index, infinity(0, { $0 + 5 })).take(10) {
+    println("\(i) : \(n)")
+}
 
 println("-- fibonacci number --")
 func fibonacci(a: Int64, b: Int64) -> List<Int64> {
