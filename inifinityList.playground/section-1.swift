@@ -12,6 +12,10 @@ func cons<T>(value: T, list: List<T>) -> List<T> {
     return List.Cons(value, { list })
 }
 
+func one<T>(value: T) -> List<T> {
+    return cons(value, .Nil)
+}
+
 func lazyCons<T>(value: T, f: () -> List<T>) -> List<T> {
     return List.Cons(value, f)
 }
@@ -44,12 +48,21 @@ extension List : SequenceType {
             return value
         }
     }
-    var array: [T] {
+    var toArray: [T] {
         var r = [T]()
         for n in self {
             r += [n]
         }
         return r
+    }
+}
+extension Array {
+    var toList: List<T> {
+        var list = List<T>.Nil
+        for value in self.reverse() {
+            list = cons(value, list)
+        }
+        return list
     }
 }
 
@@ -131,6 +144,16 @@ func zip<T, U>(a: List<T>, b: List<U>) -> List<(T, U)> {
     }
     return .Nil
 }
+func flatten<T>(list: List<List<T>>) -> List<T> {
+    if let out_car: List<T> = list.car {
+        if let in_car: T = out_car.car {
+            return lazyCons(in_car) { flatten(cons(out_car.cdr, list.cdr)) }
+        } else {
+            return flatten(list.cdr)
+        }
+    }
+    return .Nil
+}
 
 func infinity<T>(v: T, f: T -> T) -> List<T> {
     return lazyCons(v) { infinity(f(v), f) }
@@ -201,6 +224,15 @@ for n in natural.take(10).filter({ $0 % 2 == 0 }) {
 
 println("-- reduce --")
 println(natural.take(10).reduce(0, combine: { $0 + $1 }))
+
+println("-- moonside --")
+func moonside(text: String, count: Int) -> String {
+    let characters = Array(text).toList
+    let duplicated = characters.map { c in one(c).repeat(count) }
+    let flat = flatten(duplicated)
+    return String(flat)
+}
+println(moonside("ムーンサイドへようこそ", 3))
 
 println("-- newton sqrt --")
 func newton_sqrt(x: Double, a: Double) -> List<Double> {
