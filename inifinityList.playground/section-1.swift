@@ -154,6 +154,11 @@ func flatten<T>(list: List<List<T>>) -> List<T> {
     }
     return .Nil
 }
+extension List {
+    func flatMap<U>(f: T -> List<U>) -> List<U> {
+        return flatten(self.map(f))
+    }
+}
 
 func infinity<T>(v: T, f: T -> T) -> List<T> {
     return lazyCons(v) { infinity(f(v), f) }
@@ -227,10 +232,7 @@ println(natural.take(10).reduce(0, combine: { $0 + $1 }))
 
 println("-- moonside --")
 func moonside(text: String, count: Int) -> String {
-    let characters = Array(text).toList
-    let duplicated = characters.map { c in one(c).repeat(count) }
-    let flat = flatten(duplicated)
-    return String(flat)
+    return String(Array(text).toList.flatMap { c in one(c).repeat(count) })
 }
 println(moonside("ムーンサイドへようこそ", 3))
 
@@ -253,4 +255,5 @@ func napiers_constant(n: Double) -> List<Double> {
 for n in napiers_constant(1.0).take(50) {
     println(n)
 }
+
 
