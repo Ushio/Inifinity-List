@@ -183,8 +183,8 @@ func repeat<T>(value: T) -> List<T> {
 
 extension List {
     var cycle: List<T> {
-        return self.flatMap { _ in
-            self
+        return repeat(1).flatMap { _ in
+            return self
         }
     }
     func cycle(n: Int) -> List<T> {
@@ -193,7 +193,6 @@ extension List {
         }
     }
 }
-
 
 println("-- natural number --")
 
@@ -267,10 +266,10 @@ println("-- reduce --")
 println(natural.take(10).reduce(0, combine: { $0 + $1 }))
 
 println("-- moonside --")
-func moonside(text: String, count: Int) -> String {
-    return String(Array(text).toList.flatMap { c in one(c).cycle(count) })
+func moonside(text: String) -> String {
+    return String(Array(text).toList.flatMap { c in one(c) + one(c) })
 }
-println(moonside("ムーンサイドへようこそ", 3))
+println(moonside("ムーンサイドへようこそ"))
 
 println("-- newton sqrt --")
 func newton_sqrt(x: Double, a: Double) -> List<Double> {
