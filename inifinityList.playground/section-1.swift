@@ -88,10 +88,10 @@ extension List {
         return .Nil
     }
     
-    func skip(n: Int) -> List<T> {
+    func drop(n: Int) -> List<T> {
         if n > 0 {
             if let v = self.car {
-                return self.cdr.skip(n - 1)
+                return self.cdr.drop(n - 1)
             }
         }
         return self
@@ -127,9 +127,9 @@ extension List {
         }
         return none()
     }
-    var count: Int {
+    var length: Int {
         if let _ = self.car {
-            return 1 + self.cdr.count
+            return 1 + self.cdr.length
         }
         return 0
     }
@@ -298,8 +298,5 @@ let ninenine = pair(natural.take(9), natural.take(9)).map { (a, b) in
 for line in ninenine {
     println(line)
 }
-println("count = \(ninenine.count)")
-
-
-
+println("count = \(ninenine.length)")
 
