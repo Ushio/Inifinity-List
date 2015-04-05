@@ -59,6 +59,8 @@ extension List : SequenceType {
     func generate() -> ListGenerator<T> {
         return ListGenerator(self)
     }
+}
+extension List {
     var toArray: [T] {
         var r = [T]()
         for n in self {
