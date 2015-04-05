@@ -141,6 +141,7 @@ func +<T>(a: List<T>, b: List<T>) -> List<T> {
     }
     return b
 }
+
 func zip<T, U>(a: List<T>, b: List<U>) -> List<(T, U)> {
     if let va = a.car, vb = b.car {
         return lazyCons((va, vb)) { zip(a.cdr, b.cdr) }
@@ -174,15 +175,19 @@ func pair<T, U>(lhs: List<T>, rhs: List<U>) -> List<(T, U)> {
         }
     }
 }
+
+func repeat<T>(value: T) -> List<T> {
+    return lazyCons(value) { repeat(value) }
+}
+
 extension List {
-    var repeat: List<T> {
+    var cycle: List<T> {
         return self.flatMap { _ in
             self
         }
     }
-    func repeat(n: Int) -> List<T> {
-        let inf = iterate(1){ $0 }
-        return inf.take(n).flatMap { _ in
+    func cycle(n: Int) -> List<T> {
+        return repeat(1).take(n).flatMap { _ in
             return self
         }
     }
@@ -208,13 +213,13 @@ for n in odd.take(15) {
     println(n)
 }
 
-println("-- repeat --")
-for n in iterate(0, { $0 + 1 }).take(3).repeat(4) {
+println("-- cycle --")
+for n in iterate(0, { $0 + 1 }).take(3).cycle(4) {
     println(n)
 }
 
 println("-- combine --")
-for n in (iterate(0){ $0 + 1 }.take(3) + iterate(3){ $0 - 1 }.take(3)).repeat.take(20) {
+for n in (iterate(0){ $0 + 1 }.take(3) + iterate(3){ $0 - 1 }.take(3)).cycle.take(20) {
     println(n)
 }
 
@@ -262,7 +267,7 @@ println(natural.take(10).reduce(0, combine: { $0 + $1 }))
 
 println("-- moonside --")
 func moonside(text: String, count: Int) -> String {
-    return String(Array(text).toList.flatMap { c in one(c).repeat(count) })
+    return String(Array(text).toList.flatMap { c in one(c).cycle(count) })
 }
 println(moonside("ムーンサイドへようこそ", 3))
 
@@ -294,6 +299,7 @@ for line in ninenine {
     println(line)
 }
 println("count = \(ninenine.count)")
+
 
 
 
