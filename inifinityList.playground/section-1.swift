@@ -7,9 +7,8 @@ enum List<T> {
     case Nil
 }
 
-
 func cons<T>(value: T, list: List<T>) -> List<T> {
-    return List.Cons(value, { list })
+    return List.Cons(value) { list }
 }
 
 func one<T>(value: T) -> List<T> {
