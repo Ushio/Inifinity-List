@@ -25,7 +25,7 @@ func lazyCons<T>(value: T, f: () -> List<T>) -> List<T> {
 extension List {
     var car: T? {
         switch self {
-        case let .Cons(car, cdr):
+        case let .Cons(car, _):
             return car
         case .Nil:
             return nil
@@ -33,7 +33,7 @@ extension List {
     }
     var cdr: List<T> {
         switch self {
-        case let .Cons(car, cdr):
+        case let .Cons(_, cdr):
             return cdr()
         case .Nil:
             return .Nil
@@ -41,14 +41,24 @@ extension List {
     }
 }
 
+struct ListGenerator<T> : GeneratorType {
+    typealias Element = T
+    
+    init(_ list: List<T>) {
+        _list = list
+    }
+    
+    mutating func next() -> Element? {
+        let car = _list.car
+        _list = _list.cdr
+        return car
+    }
+    var _list: List<T>
+}
+
 extension List : SequenceType {
-    func generate() -> GeneratorOf<T> {
-        var list = self
-        return GeneratorOf {
-            let value = list.car
-            list = list.cdr
-            return value
-        }
+    func generate() -> ListGenerator<T> {
+        return ListGenerator(self)
     }
     var toArray: [T] {
         var r = [T]()
@@ -85,28 +95,6 @@ extension List {
             }
         }
         return self
-    }
-    
-    func _repeat(origin: List<T>) -> List<T> {
-        if let v = self.car {
-            return lazyCons(v) { self.cdr._repeat(origin) }
-        }
-        return origin._repeat(origin)
-    }
-    var repeat: List<T> {
-        return self._repeat(self)
-    }
-    func _repeat(n: Int, _ origin: List<T>) -> List<T> {
-        if n <= 0 {
-            return .Nil
-        }
-        if let v = self.car {
-            return lazyCons(v) { self.cdr._repeat(n, origin) }
-        }
-        return origin._repeat(n - 1, origin)
-    }
-    func repeat(n: Int) -> List<T> {
-        return self._repeat(n, self)
     }
 
     func map<U>(f: T -> U) -> List<U> {
@@ -186,6 +174,20 @@ func pair<T, U>(lhs: List<T>, rhs: List<U>) -> List<(T, U)> {
         }
     }
 }
+extension List {
+    var repeat: List<T> {
+        return self.flatMap { _ in
+            self
+        }
+    }
+    func repeat(n: Int) -> List<T> {
+        let inf = iterate(1){ $0 }
+        return inf.take(n).flatMap { _ in
+            return self
+        }
+    }
+}
+
 
 println("-- natural number --")
 
