@@ -175,8 +175,8 @@ extension List {
     }
 }
 
-func infinity<T>(v: T, f: T -> T) -> List<T> {
-    return lazyCons(v) { infinity(f(v), f) }
+func iterate<T>(v: T, f: T -> T) -> List<T> {
+    return lazyCons(v) { iterate(f(v), f) }
 }
 
 func pair<T, U>(lhs: List<T>, rhs: List<U>) -> List<(T, U)> {
@@ -189,7 +189,7 @@ func pair<T, U>(lhs: List<T>, rhs: List<U>) -> List<(T, U)> {
 
 println("-- natural number --")
 
-let natural = infinity(1){ $0 + 1 }
+let natural = iterate(1){ $0 + 1 }
 for n in natural.take(15) {
     println(n)
 }
@@ -201,24 +201,24 @@ for n in natural.take(15).reverse {
 
 println("-- odd number --")
 
-let odd = infinity(1){ $0 + 2 }
+let odd = iterate(1){ $0 + 2 }
 for n in odd.take(15) {
     println(n)
 }
 
 println("-- repeat --")
-for n in infinity(0, { $0 + 1 }).take(3).repeat(4) {
+for n in iterate(0, { $0 + 1 }).take(3).repeat(4) {
     println(n)
 }
 
 println("-- combine --")
-for n in (infinity(0){ $0 + 1 }.take(3) + infinity(3){ $0 - 1 }.take(3)).repeat.take(20) {
+for n in (iterate(0){ $0 + 1 }.take(3) + iterate(3){ $0 - 1 }.take(3)).repeat.take(20) {
     println(n)
 }
 
 println("-- zip --")
-let index = infinity(0){ $0 + 1 }
-for (i, n) in zip(index, infinity(0, { $0 + 5 })).take(10) {
+let index = iterate(0){ $0 + 1 }
+for (i, n) in zip(index, iterate(0, { $0 + 5 })).take(10) {
     println("\(i) : \(n)")
 }
 
@@ -292,5 +292,6 @@ for line in ninenine {
     println(line)
 }
 println("count = \(ninenine.count)")
+
 
 
