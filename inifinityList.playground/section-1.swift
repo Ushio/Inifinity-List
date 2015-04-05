@@ -271,6 +271,16 @@ func moonside(text: String) -> String {
 }
 println(moonside("ムーンサイドへようこそ"))
 
+println("-- 9 x 9 --")
+let ninenine = pair(natural.take(9), natural.take(9)).map { (a, b) in
+    return "\(a) x \(b) = \(a * b)"
+}
+for line in ninenine {
+    println(line)
+}
+println("count = \(ninenine.length)")
+
+
 println("-- newton sqrt --")
 func newton_sqrt(x: Double, a: Double) -> List<Double> {
     let f = { x in (x + a / x) * 0.5 }
@@ -290,13 +300,4 @@ func napiers_constant(n: Double) -> List<Double> {
 for n in napiers_constant(1.0).take(50) {
     println(n)
 }
-
-println("-- 9 x 9 --")
-let ninenine = pair(natural.take(9), natural.take(9)).map { (a, b) in
-    return "\(a) x \(b) = \(a * b)"
-}
-for line in ninenine {
-    println(line)
-}
-println("count = \(ninenine.length)")
 
