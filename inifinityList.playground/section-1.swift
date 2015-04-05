@@ -15,7 +15,9 @@ func cons<T>(value: T, list: List<T>) -> List<T> {
 func one<T>(value: T) -> List<T> {
     return cons(value, .Nil)
 }
-
+func none<T>() -> List<T> {
+    return .Nil
+}
 func lazyCons<T>(value: T, f: () -> List<T>) -> List<T> {
     return List.Cons(value, f)
 }
@@ -130,6 +132,19 @@ extension List {
         }
         return initial
     }
+    
+    var reverse: List<T> {
+        if let car = self.car {
+            return self.cdr.reverse + one(car)
+        }
+        return none()
+    }
+    var count: Int {
+        if let _ = self.car {
+            return 1 + self.cdr.count
+        }
+        return 0
+    }
 }
 
 func +<T>(a: List<T>, b: List<T>) -> List<T> {
@@ -164,10 +179,23 @@ func infinity<T>(v: T, f: T -> T) -> List<T> {
     return lazyCons(v) { infinity(f(v), f) }
 }
 
+func pair<T, U>(lhs: List<T>, rhs: List<U>) -> List<(T, U)> {
+    return lhs.flatMap { lhsValue in
+        return rhs.map { rhsValue in
+            (lhsValue, rhsValue)
+        }
+    }
+}
+
 println("-- natural number --")
 
 let natural = infinity(1){ $0 + 1 }
 for n in natural.take(15) {
+    println(n)
+}
+
+println("-- reverse natural number --")
+for n in natural.take(15).reverse {
     println(n)
 }
 
@@ -255,5 +283,14 @@ func napiers_constant(n: Double) -> List<Double> {
 for n in napiers_constant(1.0).take(50) {
     println(n)
 }
+
+println("-- 9 x 9 --")
+let ninenine = pair(natural.take(9), natural.take(9)).map { (a, b) in
+    return "\(a) x \(b) = \(a * b)"
+}
+for line in ninenine {
+    println(line)
+}
+println("count = \(ninenine.count)")
 
 
