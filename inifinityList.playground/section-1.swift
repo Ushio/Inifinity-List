@@ -60,22 +60,27 @@ extension List : SequenceType {
         return ListGenerator(self)
     }
 }
-extension List {
-    var toArray: [T] {
-        var r = [T]()
-        for n in self {
-            r += [n]
+
+func toList<T: GeneratorType>(var g: T) -> List<T.Element>{
+    if let value = g.next() {
+        return lazyCons(value) {
+            toList(g)
         }
-        return r
+    }
+    return .Nil
+}
+
+extension List {
+    init<S : SequenceType where T == S.Generator.Element>(_ s: S) {
+        self = toList(s.generate())
     }
 }
-extension Array {
-    var toList: List<T> {
-        var list = List<T>.Nil
-        for value in self.reverse() {
-            list = cons(value, list)
-        }
-        return list
+extension List : ArrayLiteralConvertible {
+    typealias Element = T
+    
+    /// Create an instance initialized with `elements`.
+    init(arrayLiteral elements: Element...) {
+        self = List(elements)
     }
 }
 
@@ -194,6 +199,18 @@ extension List {
     }
 }
 
+println("-- bridge --")
+let array = [2, 3, 5, 7, 11, 13]
+let fromArray = List(array)
+for n in fromArray {
+    println(n)
+}
+println("-- literal --")
+let fromLiteral: List<String> = ["13", "11", "7", "5", "3", "2"]
+for n in fromLiteral {
+    println("\"\(n)\"")
+}
+
 println("-- natural number --")
 
 let natural = iterate(1){ $0 + 1 }
@@ -263,11 +280,11 @@ for n in natural.take(10).filter({ $0 % 2 == 0 }) {
 }
 
 println("-- reduce --")
-println(natural.take(10).reduce(0, combine: { $0 + $1 }))
+println(natural.take(10).reduce(0, combine: +))
 
 println("-- moonside --")
 func moonside(text: String) -> String {
-    return String(Array(text).toList.flatMap { c in one(c) + one(c) })
+    return String(List(Array(text)).flatMap { c in one(c) + one(c) })
 }
 println(moonside("ムーンサイドへようこそ"))
 
@@ -300,4 +317,6 @@ func napiers_constant(n: Double) -> List<Double> {
 for n in napiers_constant(1.0).take(50) {
     println(n)
 }
+
+
 
